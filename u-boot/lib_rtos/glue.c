@@ -27,6 +27,7 @@
  */
  
 extern void rt_hw_vector_init(rd_t *rd);
+status rt_uint32_t boot_c0status;
 
 /*@{*/
 
@@ -57,7 +58,9 @@ void rt_hw_timer_init(rd_t *rd)
 
 void rt_thread_shutdown_os(void)
 {
-	write_c0_status((read_c0_status()&0xFFFF00F8) | 0x00000004);
+	write_c0_status(boot_c0status);
+	write_c0_compare(0);
+	write_c0_count(0);
 }
 
 /**
@@ -74,6 +77,8 @@ void rt_hw_board_init(rd_t *rd)
 	/* init hardware interrupt */
 	rt_hw_interrupt_init();
 
+	boot_c0status = read_c0_status();
+	
 	/* clear bev */
 	write_c0_status(read_c0_status()&(~(1<<22)));
 	

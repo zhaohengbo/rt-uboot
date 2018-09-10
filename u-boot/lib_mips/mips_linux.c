@@ -27,6 +27,7 @@
 #include <asm/byteorder.h>
 #include <asm/addrspace.h>
 #include <ar7240_soc.h>
+#include <rtos/rtos_data.h>
 
 /* #define DEBUG */
 
@@ -201,12 +202,15 @@ void do_bootm_linux(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	s = getenv("lsdk_kernel");
 	lsdk_kernel = s ? simple_strtol(s, NULL, 10) : 0;
 	
-	extern void rt_thread_shutdown_os(void);
+	if(gd->rtos_status)
+	{
+		extern void rt_thread_shutdown_os(void);
 	
-	rt_thread_shutdown_os();
+		rt_thread_shutdown_os();
 	
-	printf("Shut down rtos...\n");
-
+		printf("Shut down rtos...\n");
+	}
+	
 	if (lsdk_kernel > 0) {
 		LSDKKernel = (void (*)(int, char **,
 				       ulong, ulong))ntohl(hdr->ih_ep);
