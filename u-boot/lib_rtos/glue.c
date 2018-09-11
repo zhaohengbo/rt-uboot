@@ -27,7 +27,7 @@
  */
  
 extern void rt_hw_vector_init(rd_t *rd);
-status rt_uint32_t boot_c0status;
+static rt_uint32_t boot_c0status;
 
 /*@{*/
 
