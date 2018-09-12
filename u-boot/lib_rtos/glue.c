@@ -118,7 +118,7 @@ void rt_hw_board_init(rd_t *rd)
 }
 
 ALIGN(RT_ALIGN_SIZE)
-static char thread_main_stack[0x4000];
+static char thread_main_stack[0x40000];
 struct rt_thread thread_main;
 void rt_thread_entry_main(void* parameter)
 {

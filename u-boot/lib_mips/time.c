@@ -48,22 +48,32 @@ ulong get_timer(ulong base)
 
 void udelay(unsigned long usec)
 {
+	ulong tmo;
+	ulong m;
+	rt_uint32_t level;
+	ulong start = get_timer(0);
+	bd_t *bd = gd->bd;
+
+	tmo = usec * (CFG_HZ / 1000000);
 	if(!gd->rtos_status)
 	{
-		ulong tmo;
-		ulong start = get_timer(0);
-		bd_t *bd = gd->bd;
-
-		tmo = usec * (CFG_HZ / 1000000);
-
 		while ((ulong)((mips_count_get() - start)) < tmo)
 			/* NOP */;	
 	}
 	else
 	{
-		ulong m;
-		m = usec/1000 + 1;
-		rt_thread_delay(RT_TICK_PER_SECOND/1000 * m);
+		if(tmo < (CFG_HZ/RT_TICK_PER_SECOND))
+		{
+			level = rt_hw_interrupt_disable();
+			while ((ulong)((mips_count_get() - start)) < tmo)
+				/* NOP */;	
+			rt_hw_interrupt_enable(level);
+		}
+		else
+		{
+			m = usec/1000 + 1;
+			rt_thread_delay(RT_TICK_PER_SECOND/1000 * m);
+		}
 	}
 	
 }
