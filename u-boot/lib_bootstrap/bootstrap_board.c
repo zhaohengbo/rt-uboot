@@ -128,6 +128,8 @@ void bootstrap_board_init_f(ulong bootflag)
 	ulong addr, addr_sp, len = (ulong)&uboot_end_bootstrap - BOOTSTRAP_CFG_MONITOR_BASE;
 	ulong *s;
 
+	all_led_on();
+	
 	/* Pointer is writable since we allocated a register for it */
 	id = &gd_data;
 
@@ -224,6 +226,8 @@ void bootstrap_board_init_r(gd_t *id, ulong dest_addr)
 	image_header_t *hdr = &header;
 	unsigned int destLen;
 	int (*fn)(int);
+	
+	all_led_off();
 
 	/* Initialize malloc() area */
 	mem_malloc_init(dest_addr);
