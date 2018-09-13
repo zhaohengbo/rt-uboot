@@ -41,7 +41,7 @@ extern void debug_on_serial(char * text,unsigned long pc_pointer);
 
 static void rt_hw_syscall_handler(int vector, void *param)
 {
-    rt_kprintf("Unhandled syscall`	1 %d occured!!!\n", vector);
+    rt_kprintf("Unhandled syscall %d occured!!!\n", vector);
 }
 
 static void rt_hw_interrupt_handler(int vector, void *param)
@@ -59,7 +59,7 @@ void rt_hw_interrupt_init(void)
 
     // 设置协处理器0的状态寄存器SR的IM7-2，允许中断
     c0_status = read_c0_status();
-    c0_status |= 0xFF00;
+    c0_status |= 0x8000;
     write_c0_status(c0_status);
 
     rt_memset(irq_handle_table, 0x00, sizeof(irq_handle_table));

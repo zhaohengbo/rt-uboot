@@ -577,6 +577,7 @@
 			"mfc0\t%0, " #source ", " #sel "\n\t"		\
 			".set\tmips0\n\t"				\
 			: "=r" (__res));				\
+	__asm__ __volatile__("ehb");            \
 	__res;								\
 })
 
@@ -592,6 +593,7 @@ do {									\
 			"mtc0\t%z0, " #register ", " #sel "\n\t"	\
 			".set\tmips0"					\
 			: : "Jr" ((unsigned int)(value)));		\
+	__asm__ __volatile__("ehb");            \
 } while (0)
 
 #define read_c0_index()			__read_32bit_c0_register($0, 0)
@@ -687,12 +689,14 @@ do {									\
         "cfc1\t%0,"STR(source)"\n\t"                            \
 	".set\tpop"						\
         : "=r" (__res));                                        \
+	__asm__ __volatile__("ehb");            \
         __res;})
 #define write_32bit_cp1_register(register, value)   \
 do {                                        \
     __asm__ __volatile__(                   \
         "ctc1\t%z0, "STR(register)"\n\t"      \
         : : "Jr" ((unsigned int)(value)));  \
+	__asm__ __volatile__("ehb");            \
 } while (0)
         
 #define read_c1_status()            read_32bit_cp1_register(CP1_STATUS)

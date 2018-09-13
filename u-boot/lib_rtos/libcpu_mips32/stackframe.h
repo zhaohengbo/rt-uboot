@@ -116,18 +116,22 @@
 		LONG_S	k1, PT_R29(sp)
 		LONG_S	$3, PT_R3(sp)
 		LONG_S	$0, PT_R0(sp)
-		mfc0	v1, CP0_STATUS
+		MFC0	v1, CP0_STATUS
+		ehb
 		LONG_S	$2, PT_R2(sp)
 		LONG_S	v1, PT_STATUS(sp)
 		li      k1,0xFFFFFFE0
 		and     v1, k1
-		mtc0    v1, CP0_STATUS
+		MTC0    v1, CP0_STATUS
+		ehb
 		LONG_S	$4, PT_R4(sp)
-		mfc0	v1, CP0_CAUSE
+		MFC0	v1, CP0_CAUSE
+		ehb
 		LONG_S	$5, PT_R5(sp)
 		LONG_S	v1, PT_CAUSE(sp)
 		LONG_S	$6, PT_R6(sp)
 		MFC0	v1, CP0_EPC
+		ehb
 		LONG_S	$7, PT_R7(sp)
 		LONG_S	v1, PT_EPC(sp)
 		LONG_S	$25, PT_R25(sp)
@@ -186,9 +190,11 @@
 		li      v1, 0xFFFFFFF9
 		and     v0, v1
 		ori     v0, 3
-		mtc0	v0, CP0_STATUS
+		MTC0	v0, CP0_STATUS
+		ehb
 		LONG_L	v1, PT_EPC(sp)
 		MTC0	v1, CP0_EPC
+		ehb
 		LONG_L	$31, PT_R31(sp)
 		LONG_L	$28, PT_R28(sp)
 		LONG_L	$25, PT_R25(sp)

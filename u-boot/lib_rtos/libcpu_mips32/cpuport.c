@@ -46,7 +46,7 @@ rt_uint8_t *rt_hw_stack_init(void *tentry, void *parameter, rt_uint8_t *stack_ad
     {
     	g_sr = read_c0_status();
     	g_sr &= 0xfffffffe;
-    	g_sr |= 0x0401;
+    	g_sr |= 0x8001;
 
 		g_gp = $GP;
     }
