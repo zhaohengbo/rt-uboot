@@ -121,20 +121,11 @@ static char thread_main_stack[0x20000];
 struct rt_thread thread_main;
 void rt_thread_entry_main(void* parameter)
 {
-	extern void main_loop(void);
-	extern unsigned long mips_cpu_feq;
-	//rt_hw_interrupt_disable();
-	//DECLARE_GLOBAL_DATA_PTR;
-	//gd->rtos_status = 0;
+	extern void board_main_loop(void);
     while (1)
     {
-		//write_c0_status(read_c0_status()&0xFFFF00FF);
-		printf("current sr: 0x%08x\n", read_c0_status());
-		printf("current cpuhz: 0x%08x\n", mips_cpu_feq);
-		printf("current timer compare: 0x%08x\n", read_c0_compare());
-		rt_thread_delay(RT_TICK_PER_SECOND);
-		//for (;;)
-			//main_loop();
+		for (;;)
+			board_main_loop();
     }
 }
 
@@ -143,13 +134,13 @@ static char thread_led_stack[0x400];
 struct rt_thread thread_led;
 void rt_thread_entry_led(void* parameter)
 {
-	extern void all_led_on(void);
-	extern void all_led_off(void);
+	extern void led_on(void);
+	extern void led_off(void);
     while (1)
     {
-		//all_led_on();
+		led_on();
 		rt_thread_delay(RT_TICK_PER_SECOND);
-		//all_led_off();
+		led_off();
 		rt_thread_delay(RT_TICK_PER_SECOND);
     }
 }

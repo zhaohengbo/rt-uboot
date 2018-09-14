@@ -1311,10 +1311,10 @@ int check_image_validation(void)
  */
 
 gd_t gd_data;
- 
+cmd_tbl_t *cmdtp;
+
 void board_init_r (gd_t *id, ulong dest_addr)
 {
-	cmd_tbl_t *cmdtp;
 	ulong size;
 	extern void malloc_bin_reloc (void);
 #ifndef CFG_ENV_IS_NOWHERE
@@ -1323,11 +1323,6 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	char *s, *e;
 	bd_t *bd;
 	int i;
-	int timer1= CONFIG_BOOTDELAY;
-	unsigned char BootType='3', confirm=0;
-	int my_tmp;
-	char addr_str[11];
-	
 	rd_t rd;
 	
 #if defined (CFG_ENV_IS_IN_FLASH)
@@ -1513,11 +1508,15 @@ void board_init_r (gd_t *id, ulong dest_addr)
 		printf("ra_spi_init fail\n");
 		while(1);
 	}
+	printf("ra_spi_init success\n");
+	printf("#error6\n");
 	bd->bi_flashstart = 0;
 	bd->bi_flashsize = size;
 	bd->bi_flashoffset = 0;
+	printf("#error5\n");
 #else //CFG_ENV_IS_IN_FLASH
 	/* configure available FLASH banks */
+	printf("#error1\n");
 	size = flash_init();
 
 	bd->bi_flashstart = CFG_FLASH_BASE;
@@ -1533,9 +1532,11 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	/* Enable ePA/eLNA share pin */
 	{
 		char ee35;
+		printf("#error2\n");
 		raspi_read((char *)&ee35, CFG_FACTORY_ADDR-CFG_FLASH_BASE+0x35, 1);
 		if (ee35 & 0x2)
 		{
+			printf("#error3\n");
 			RALINK_REG(RALINK_SYSCTL_BASE+0x60)|= ((0x3<<24)|(0x3 << 6));
 		}
 	}
@@ -1543,27 +1544,34 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	// reset MIPS now also reset Andes
 	RALINK_REG(RALINK_SYSCTL_BASE+0x38)|= 0x200;	
 #endif	
+	printf("#error4\n");
 	
 	/* initialize malloc() area */
+	printf ("mem_malloc_init\n");
 	mem_malloc_init();
+	printf ("malloc_bin_reloc\n");
 	malloc_bin_reloc();
 
 #if defined (CFG_ENV_IS_IN_NAND)
 	nand_env_init();
 #elif defined (CFG_ENV_IS_IN_SPI)
+	printf ("spi_env_init\n");
 	spi_env_init();
 #else //CFG_ENV_IS_IN_FLASH
 #endif //CFG_ENV_IS_IN_FLASH
 
 #if defined(RT3052_ASIC_BOARD)
+	printf ("adjust_frequency\n");
 	void adjust_frequency(void);
 	//adjust_frequency();
 #endif
 #if defined (RT3352_ASIC_BOARD)
+	printf ("adjust_crystal_circuit\n");
 	void adjust_crystal_circuit(void);
 	adjust_crystal_circuit();
 #endif
 #if defined (RT3352_ASIC_BOARD) || defined (RT3883_ASIC_BOARD)
+	printf ("adjust_rf_r17\n");
 	void adjust_rf_r17(void);
 	adjust_rf_r17();
 #endif
@@ -1968,14 +1976,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 #ifdef DUAL_IMAGE_SUPPORT
 	check_image_validation();
 #endif
-/*config bootdelay via environment parameter: bootdelay */
-	{
-	    char * s;
-	    s = getenv ("bootdelay");
-	    timer1 = s ? (int)simple_strtol(s, NULL, 10) : CONFIG_BOOTDELAY;
-	}
-/*web failsafe*/
-	
+
 	rd.vector_addr = gd->rtos_start;
 	rd.rtos_mem_start = gd->rtos_start + 0x1000;
 	rd.rtos_mem_end = gd->rtos_end;
@@ -1994,6 +1995,32 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	
 	printf("RTOS kernel exit error,run in no-os mode...\n\n");
 	
+extern void board_main_loop(void);
+
+	while(1)
+		board_main_loop();
+	
+	/* NOTREACHED - no way out of command loop except booting */
+}
+
+void board_main_loop(void)
+{	
+	unsigned char BootType='3', confirm=0;
+	int my_tmp;
+	int timer1= CONFIG_BOOTDELAY;
+	char addr_str[11];
+	bd_t *bd;
+	int i;
+	
+	bd = gd->bd;
+	/*config bootdelay via environment parameter: bootdelay */
+	{
+	    char * s;
+	    s = getenv ("bootdelay");
+	    timer1 = s ? (int)simple_strtol(s, NULL, 10) : CONFIG_BOOTDELAY;
+	}
+	
+	/*web failsafe*/	
 	gpio_init();
 	led_off();
 	printf( "\nif you press the WPS button will automatically enter the Update mode\n");
@@ -2337,10 +2364,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 		do_reset(cmdtp, 0, argc, argv);
 
 	} /* end of else */
-
-	/* NOTREACHED - no way out of command loop except booting */
 }
-
 
 void hang (void)
 {
