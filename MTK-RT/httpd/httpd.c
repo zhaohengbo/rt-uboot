@@ -96,6 +96,7 @@ static void httpd_state_reset(void){
 
 	if(boundary_value){
 		free(boundary_value);
+		boundary_value = 0;
 	}
 }
 
