@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nandboot>
+        <magic_numbers>
+                <usr_part_magic1>0xAA7D1B9A</usr_part_magic1>
+                <usr_part_magic2>0x1F7D48BC</usr_part_magic2>
+        </magic_numbers>
+        <partition_version length="4">0x4</partition_version>
+        <partitions>
+                <partition>
+                        <name length="16" type="string">0:SBL1</name>
+                        <size_kb length="4">256</size_kb>
+                        <pad_kb length="4">256</pad_kb>
+                        <which_flash>0</which_flash>
+                        <attr>0xFF</attr>
+                        <attr>0xFF</attr>
+                        <attr>0x00</attr>
+                        <attr>0xFF</attr>
+			<img_name type="string">sbl1_nand.mbn</img_name>
+                </partition>
+                <partition>
+                        <name length="16" type="string">0:MIBIB</name>
+                        <size_kb length="4">256</size_kb>
+                        <pad_kb length="4">256</pad_kb>
+                        <which_flash>0</which_flash>
+                        <attr>0xFF</attr>
+                        <attr>0xFF</attr>
+                        <attr>0x00</attr>
+                        <attr>0xFF</attr>
+			<img_name type="string">nand-user-partition-ipq40xx.bin</img_name>
+                </partition>
+                <partition>
+                        <name length="16" type="string">0:QSEE</name>
+                        <size_kb length="4">512</size_kb>
+                        <pad_kb length="4">512</pad_kb>
+                        <which_flash>0</which_flash>
+                        <attr>0xFF</attr>
+                        <attr>0xFF</attr>
+                        <attr>0x00</attr>
+                        <attr>0xFF</attr>
+			<img_name type="string">tz.mbn</img_name>
+                </partition>
+                <partition>
+                        <name length="16" type="string">0:CDT</name>
+                        <size_kb length="4">256</size_kb>
+                        <pad_kb length="4">256</pad_kb>
+                        <which_flash>0</which_flash>
+                        <attr>0xFF</attr>
+                        <attr>0xFF</attr>
+                        <attr>0x00</attr>
+                        <attr>0xFF</attr>
+			<img_name type="string">cdt.bin</img_name>
+                </partition>
+                <partition>
+                        <name length="16" type="string">0:APPSBL</name>
+                        <size_kb length="4">640</size_kb>
+                        <pad_kb length="4">640</pad_kb>
+                        <which_flash>0</which_flash>
+                        <attr>0xFF</attr>
+                        <attr>0xFF</attr>
+                        <attr>0x00</attr>
+                        <attr>0xFF</attr>
+			<img_name type="string">openwrt-ipq40xx-u-boot-stripped.elf</img_name>
+                </partition>
+                <partition>
+                        <name length="16" type="string">0:APPSBLENV</name>
+                        <size_kb length="4">128</size_kb>
+                        <pad_kb length="4">128</pad_kb>
+                        <which_flash>0</which_flash>
+                        <attr>0xFF</attr>
+                        <attr>0xFF</attr>
+                        <attr>0x00</attr>
+                        <attr>0xFF</attr>
+                </partition>
+        </partitions>
+</nandboot>
+
+

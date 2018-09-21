@@ -1,0 +1,37 @@
+========
+RT-AC82U formal - ONFI nand
+========
+
+1. Install toolchain and configure PATH environment variable in accordance with ../../../README.TXT
+2. Run "make rt-ac82u_config"
+3. Run "make"
+4. Load u-boot_nand.img to RT-AC82U.
+
+========
+RT-AC58U formal - (nor + nand)
+========
+
+1. Install toolchain and configure PATH environment variable in accordance with ../../../README.TXT
+2. Run "make rt-ac58u_config" for 128MB version
+   or
+   Run "make rt-ac58u_256MB_config" for 256MB version
+3. Run "make"
+4. Load u-boot_norplusnand.img to RT-AC58U.
+
+========
+RT-AC58U - nor flash only
+========
+1. Install toolchain and configure PATH environment variable in accordance with ../../../README.TXT
+2. Run "make rt-ac58n_config"
+3. Run "make"
+4. Load u-boot_nor.img to RT-AC58U.
+
+========
+4G-AC53U formal - (nor + nand)
+========
+
+1. Install toolchain and configure PATH environment variable in accordance with ../../../README.TXT
+2. Run "make 4g-ac53u_config"
+3. Run "make"
+4. Load u-boot_norplusnand.img to 4G-AC53U.
+
