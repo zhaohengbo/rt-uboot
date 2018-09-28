@@ -14,7 +14,6 @@
 
 #include <rtthread.h>
 #include <rthw.h>
-#include <board.h>
 
 #include "armv7.h"
 

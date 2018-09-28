@@ -14,6 +14,9 @@
 
 #include <rthw.h>
 #include <rtthread.h>
+
+#include <rtos/rtos_data.h>
+
 #include "gic.h"
 #include "soc_config.h"
 
@@ -31,10 +34,24 @@ rt_uint32_t rt_thread_switch_interrupt_flag;
 
 extern void rt_cpu_vector_set_base(unsigned int addr);
 extern int system_vectors;
+extern int system_vectors_end;
 
 static void rt_hw_vector_init(void)
 {
-    rt_cpu_vector_set_base((unsigned int)&system_vectors);
+	rt_uint32_t int_vector;
+	int_vector = rd.ram_buttom;
+	
+	RT_ASSERT(rd.ram_size > 0x800000);
+	
+	if((int_vector & 0xFFFFF) < 0x40000)
+	{
+		int_vector -= 0x100000;
+	}
+	int_vector &= ~(0xFFFFF);
+	
+	rt_memcpy((void *)int_vector, (void *)&system_vectors , (system_vectors_end - system_vectors));
+	
+    rt_cpu_vector_set_base(int_vector);
 }
 
 /**
@@ -83,6 +100,15 @@ void rt_hw_interrupt_umask(int vector)
     arm_gic_umask(0, vector);
 }
 
+/**
+ * This function will config a interrupt.
+ * @param vector the interrupt number
+ * @param config the interrupt config
+ */
+void rt_hw_interrupt_config(int vector,int config)
+{
+    arm_gic_config(0, vector, config);
+}
 /**
  * This function will install a interrupt service routine to a interrupt.
  * @param vector the interrupt number

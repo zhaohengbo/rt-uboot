@@ -91,21 +91,21 @@ rt_hw_context_switch:
 /*
  * void rt_hw_context_switch_interrupt(rt_uint32 from, rt_uint32 to);
  */
-.globl rt_thread_switch_interrupt_flag
-.globl rt_interrupt_from_thread
-.globl rt_interrupt_to_thread
+.globl _rt_thread_switch_interrupt_flag
+.globl _rt_interrupt_from_thread
+.globl _rt_interrupt_to_thread
 .globl rt_hw_context_switch_interrupt
 rt_hw_context_switch_interrupt:
-    ldr r2, =rt_thread_switch_interrupt_flag
+    ldr r2, _rt_thread_switch_interrupt_flag
     ldr r3, [r2]
     cmp r3, #1
     beq _reswitch
-    ldr ip, =rt_interrupt_from_thread   @ set rt_interrupt_from_thread
+    ldr ip, _rt_interrupt_from_thread   @ set rt_interrupt_from_thread
     mov r3, #1              @ set rt_thread_switch_interrupt_flag to 1
     str r0, [ip]
     str r3, [r2]
 _reswitch:
-    ldr r2, =rt_interrupt_to_thread     @ set rt_interrupt_to_thread
+    ldr r2, _rt_interrupt_to_thread     @ set rt_interrupt_to_thread
     str r1, [r2]
     bx  lr
 
@@ -138,7 +138,7 @@ vector_irq:
 
     @ if rt_thread_switch_interrupt_flag set, jump to
     @ rt_hw_context_switch_interrupt_do and don't return
-    ldr     r0, =rt_thread_switch_interrupt_flag
+    ldr     r0, _rt_thread_switch_interrupt_flag
     ldr     r1, [r0]
     cmp     r1, #1
     beq     rt_hw_context_switch_interrupt_do
@@ -167,11 +167,11 @@ rt_hw_context_switch_interrupt_do:
     stmfd   sp!, {r1-r4}    @ push old task's r0-r3
     stmfd   sp!, {r0}       @ push old task's cpsr
 
-    ldr     r4,  =rt_interrupt_from_thread
+    ldr     r4,  _rt_interrupt_from_thread
     ldr     r5,  [r4]
     str     sp,  [r5]       @ store sp in preempted tasks's TCB
 
-    ldr     r6,  =rt_interrupt_to_thread
+    ldr     r6,  _rt_interrupt_to_thread
     ldr     r6,  [r6]
     ldr     sp,  [r6]       @ get new task's stack pointer
 
@@ -226,5 +226,16 @@ vector_resv:
     push_svc_reg
     bl      rt_hw_trap_resv
     b       .
+
+.globl rt_thread_switch_interrupt_flag
+.globl rt_interrupt_from_thread
+.globl rt_interrupt_to_thread
+
+_rt_thread_switch_interrupt_flag:
+	.word rt_thread_switch_interrupt_flag
+_rt_interrupt_from_thread:
+	.word rt_interrupt_from_thread
+_rt_interrupt_to_thread:
+	.word rt_interrupt_to_thread
 
 	

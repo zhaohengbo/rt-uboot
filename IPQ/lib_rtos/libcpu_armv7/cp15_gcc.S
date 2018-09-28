@@ -23,6 +23,7 @@
  * 2013-07-05     Bernard      the first version
  */
 
+.text
 .globl rt_cpu_get_smp_id
 rt_cpu_get_smp_id:
     mrc     p15, #0, r0, c0, c0, #5

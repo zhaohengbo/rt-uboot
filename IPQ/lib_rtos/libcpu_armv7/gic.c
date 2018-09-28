@@ -14,10 +14,14 @@
  */
 
 #include <rtthread.h>
-#include <board.h>
 
+#include "armv7.h"
 #include "gic.h"
 #include "cp15.h"
+
+#include "soc_config.h"
+
+#define ARM_GIC_NR_IRQS SOC_HANDLERS
 
 struct arm_gic
 {
@@ -144,6 +148,18 @@ void arm_gic_umask(rt_uint32_t index, int irq)
     GIC_DIST_ENABLE_SET(_gic_table[index].dist_hw_base, irq) = mask;
 }
 
+void arm_gic_config(rt_uint32_t index, int irq, int config)
+{
+	rt_uint32_t confmask = 0x2 << ((irq % 16) * 2);
+	
+    RT_ASSERT(index < ARM_GIC_MAX_NR);
+	
+	if (config == IRQ_TYPE_LEVEL)
+		GIC_DIST_CONFIG(_gic_table[index].dist_hw_base, irq) &= ~confmask;
+	else if (config == IRQ_TYPE_EDGE)
+		GIC_DIST_CONFIG(_gic_table[index].dist_hw_base, irq) |= confmask;
+}
+
 void arm_gic_dump_type(rt_uint32_t index)
 {
     unsigned int gic_type;
@@ -220,7 +236,11 @@ int arm_gic_dist_init(rt_uint32_t index, rt_uint32_t dist_base, int irq_start)
 
     GIC_DIST_CTRL(dist_base) = 0x0;
 
-    /* Set all global interrupts to be level triggered, active low. */
+    /* Set all local interrupts to be level triggered, active low. */
+	for (i = 16; i < 32; i += 16)
+        GIC_DIST_CONFIG(dist_base, i) = 0x0;
+	
+	/* Set all global interrupts to be level triggered, active low. */
     for (i = 32; i < _gic_max_irq; i += 16)
         GIC_DIST_CONFIG(dist_base, i) = 0x0;
 

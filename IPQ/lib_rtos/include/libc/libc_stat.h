@@ -73,7 +73,8 @@
 
 /* stat structure */
 #include <stdint.h>
-#include <time.h>
+#include <linux/types.h>
+//typedef unsigned long time_t;
 
 struct stat
 {

@@ -44,9 +44,9 @@
 
 #ifndef IDLE_THREAD_STACK_SIZE
 #if defined (RT_USING_IDLE_HOOK) || defined(RT_USING_HEAP)
-#define IDLE_THREAD_STACK_SIZE  256
+#define IDLE_THREAD_STACK_SIZE  0x1000
 #else
-#define IDLE_THREAD_STACK_SIZE  128
+#define IDLE_THREAD_STACK_SIZE  0x400
 #endif
 #endif
 
@@ -277,6 +277,7 @@ void rt_thread_idle_init(void)
 
     /* startup */
     rt_thread_startup(&idle);
+	
 }
 
 /**

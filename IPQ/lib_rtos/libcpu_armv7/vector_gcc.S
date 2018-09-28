@@ -25,8 +25,9 @@
 .code 32
 
 .globl system_vectors
+.globl system_vectors_end
 system_vectors:
-    ldr pc, _vector_reset
+    b       .
     ldr pc, _vector_undef
     ldr pc, _vector_swi
     ldr pc, _vector_pabt
@@ -35,7 +36,6 @@ system_vectors:
     ldr pc, _vector_irq
     ldr pc, _vector_fiq
 
-.globl _reset
 .globl vector_undef
 .globl vector_swi
 .globl vector_pabt
@@ -44,8 +44,14 @@ system_vectors:
 .globl vector_irq
 .globl vector_fiq
 
-_vector_reset:
-    .word _reset
+.globl _vector_undef
+.globl _vector_swi
+.globl _vector_pabt
+.globl _vector_dabt
+.globl _vector_resv
+.globl _vector_irq
+.globl _vector_fiq
+
 _vector_undef:
     .word vector_undef
 _vector_swi:
@@ -60,5 +66,7 @@ _vector_irq:
     .word vector_irq
 _vector_fiq:
     .word vector_fiq
+
+system_vectors_end:
 
 .balignl    16,0xdeadbeef

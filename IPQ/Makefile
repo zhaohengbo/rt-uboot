@@ -313,6 +313,10 @@ LIBS += api/libapi.o
 LIBS += post/libpost.o
 LIBS += test/libtest.o
 
+LIBS += lib_rtos/libcpu_armv7/librtos_$(CPU).o
+LIBS += lib_rtos/kernel/librtos_kernel.o
+LIBS += lib_rtos/librtos_$(SOC).o
+
 ifneq ($(CONFIG_AM33XX)$(CONFIG_OMAP34XX)$(CONFIG_OMAP44XX)$(CONFIG_OMAP54XX),)
 LIBS += $(CPUDIR)/omap-common/libomap-common.o
 endif

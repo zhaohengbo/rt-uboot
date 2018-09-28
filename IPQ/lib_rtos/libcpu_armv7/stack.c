@@ -13,11 +13,9 @@
  * 2011-10-05     Bernard      add thumb mode
  */
 #include <rtthread.h>
-#include <board.h>
+#include "armv7.h"
 
-#include <asm/global_data.h>
-
-DECLARE_GLOBAL_DATA_PTR;
+register volatile rt_uint32_t gd asm ("r8");
 
 /**
  * @addtogroup AM33xx

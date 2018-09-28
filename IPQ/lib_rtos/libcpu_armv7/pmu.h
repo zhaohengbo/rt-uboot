@@ -1,8 +1,6 @@
 #ifndef __PMU_H__
 #define __PMU_H__
 
-#include "board.h"
-
 /* Number of counters */
 #define ARM_PMU_CNTER_NR 4
 

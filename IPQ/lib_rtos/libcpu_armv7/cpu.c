@@ -14,7 +14,6 @@
 
 #include <rthw.h>
 #include <rtthread.h>
-#include <board.h>
 
 /**
  * @addtogroup ARM CPU

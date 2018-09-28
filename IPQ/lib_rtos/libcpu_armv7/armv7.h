@@ -61,4 +61,7 @@ struct rt_hw_stack
 #define E_Bit       (1<<9)
 #define J_Bit       (1<<24)
 
+#define __REG32(x)  (*((volatile unsigned int *)(x)))
+#define __REG16(x)  (*((volatile unsigned short *)(x)))
+
 #endif

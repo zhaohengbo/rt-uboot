@@ -33,10 +33,10 @@
 .equ I_Bit,           0x80            @ when I bit is set, IRQ is disabled
 .equ F_Bit,           0x40            @ when F bit is set, FIQ is disabled
 
-.equ UND_Stack_Size,     0x00000000
-.equ SVC_Stack_Size,     0x00000400
-.equ ABT_Stack_Size,     0x00000000
-.equ RT_FIQ_STACK_PGSZ,  0x00000000
+.equ UND_Stack_Size,     0x00000400
+.equ SVC_Stack_Size,     0x00000000
+.equ ABT_Stack_Size,     0x00000400
+.equ RT_FIQ_STACK_PGSZ,  0x00000400
 .equ RT_IRQ_STACK_PGSZ,  0x00000800
 .equ USR_Stack_Size,     0x00000400
 
@@ -57,11 +57,16 @@ stack_top:
 .text
 .globl stack_setup
 
+.globl _stack_top
+_stack_top:
+	.word stack_top
+
 stack_setup:
-    ldr     r0, =stack_top
+    ldr     r0, _stack_top
 
     @  Set the startup stack for svc
-    mov     sp, r0
+    //mov     sp, r0
+	//sub     r0, r0, #SVC_Stack_Size
 
     @  Enter Undefined Instruction Mode and set its Stack Pointer
     msr     cpsr_c, #Mode_UND|I_Bit|F_Bit

@@ -56,6 +56,8 @@
 #include <hush.h>
 #endif
 
+#include <rtos/rtos_data.h>
+
 #if defined(ASUS_PRODUCT)
 #include <gpio.h>
 #include <replace.h>
@@ -470,6 +472,23 @@ void board_init_f(ulong bootflag)
 #endif
 
 #ifndef CONFIG_SPL_BUILD
+	
+	rd.ram_size = gd->ram_size;
+	
+	rd.rtos_mem_start = addr;
+	
+#define TOTAL_RTOS_LENGTH 0x4000
+	
+	addr -= TOTAL_RTOS_LENGTH;
+	addr &= ~(4096 - 1);
+	
+	rd.rtos_mem_end = addr - 4;
+
+#if defined(BOARD_DEBUG)
+	printf("Reserving %dk for RTOS at: %08lX\n",
+		TOTAL_RTOS_LENGTH >> 10, addr);
+#endif
+	
 	/*
 	 * reserve memory for malloc() arena
 	 */
@@ -537,6 +556,8 @@ void board_init_f(ulong bootflag)
 
 	debug("relocation Offset is: %08lx\n", gd->reloc_off);
 	memcpy(id, (void *)gd, sizeof(gd_t));
+	
+	rd.ram_buttom = addr_sp;
 
 #ifdef CONFIG_IPQ40XX_XIP
 	relocate_code(addr_sp, id, _TEXT_BASE);
@@ -1346,7 +1367,17 @@ void board_init_r(gd_t *id, ulong dest_addr)
 		setenv("mem", (char *)memsz);
 	}
 #endif
-
+	extern void rtthread_startup(void);
+	
+	printf("Now starting RTOS kernel...\n\n");
+	gd->rtos_status = 1;
+	
+	rtthread_startup();
+	
+	gd->rtos_status = 0;
+	
+	printf("RTOS kernel exit error,run in no-os mode...\n\n");
+	
 #if defined(ASUS_PRODUCT)
 	/* Boot Loader Menu */
 

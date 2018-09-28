@@ -15,9 +15,11 @@
 #include <rthw.h>
 #include <rtthread.h>
 
-#include "soc_config.h"
+extern void soc_timer_init(void);
+extern void soc_timer_isr_install(void);
+extern void soc_timer_isr_handler(void);
 
-static void rt_hw_timer_isr(int vector, void *param)
+void rt_hw_timer_isr(int vector, void *param)
 {
     rt_tick_increase();
     /* clear interrupt */
@@ -26,12 +28,9 @@ static void rt_hw_timer_isr(int vector, void *param)
 
 int rt_hw_timer_init(void)
 {
-    rt_uint32_t val;
-
     soc_timer_init();
-
-    rt_hw_interrupt_install(SOC_IRQ_TIMER, rt_hw_timer_isr, RT_NULL, "tick");
-    rt_hw_interrupt_umask(SOC_IRQ_TIMER);
+	
+	soc_timer_isr_install();
 
     return 0;
 }

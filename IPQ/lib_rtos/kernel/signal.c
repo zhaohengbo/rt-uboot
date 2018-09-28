@@ -23,7 +23,7 @@
  */
 
 #include <stdint.h>
-#include <string.h>
+//#include <string.h>
 
 #include <rthw.h>
 #include <rtthread.h>

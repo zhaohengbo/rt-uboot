@@ -15,6 +15,9 @@
 #ifndef __GIC_H__
 #define __GIC_H__
 
+#define IRQ_TYPE_LEVEL 0
+#define IRQ_TYPE_EDGE 1
+
 int arm_gic_dist_init(rt_uint32_t index, rt_uint32_t dist_base, int irq_start);
 int arm_gic_cpu_init(rt_uint32_t index, rt_uint32_t cpu_base);
 
