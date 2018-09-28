@@ -1,0 +1,107 @@
+&NR_CPUS=1
+&PRELOADER_DONE=0
+&PRELOADER_PC_DONE=0
+&KERNEL_DONE=0
+&RAMDISK_DONE=0
+&BOOTLOADER_DONE=0
+&SYMBOL_DONE=0
+&CPU1_DONE=0
+&CPU2_DONE=0
+&CPU3_DONE=0
+&INIT_DONE=0
+;system.reset
+SYSTEM.OPTION ENRESET ON
+SYStem.Option ResBreak OFF
+SYStem.Option WaitReset OFF
+SYStem.JtagClock 10.MHz
+if &NR_CPUS==1
+(
+SYSTEM.CPU CortexA7MPCore
+)
+else
+(
+    SYStem.CPU CortexA7MPCore
+)
+
+if &NR_CPUS==1
+(
+
+    ;Setting Core debug register access
+    SYStem.CONFIG CORENUMBER 1;
+    SYSTEM.MULTICORE COREBASE 0x80070000
+)
+else
+(
+
+;Setting Core debug register access
+    SYSTEM.CONFIG CORENUMBER 4;
+    SYSTEM.CONFIG COREBASE 0x80070000 0x80072000 0x80074000 0x80076000;
+
+)
+
+SYStem.Up
+wait 200.us
+; disable WDT
+d.s asd:0x10007000 %le %long 0x22000000
+
+
+; disable DABORT and PABORT breakpoint
+tronchip.set dabort off
+tronchip.set pabort off
+tronchip.set undef off
+tronchip.set irq off
+;
+
+; board init
+print "loading pre-loader image"
+D.LOAD.BINARY   preloader_iotg7623p1_emmc_NO_GFH.bin 0x201000
+;D.LOAD.BINARY   preloader.bin
+
+SET_PRELOADER_PC:
+&PRELOADER_PC_DONE=1
+r.s pc 0x201000
+
+RUN_PRELOADER:
+&PRELOADER_DONE=1
+go
+wait 2000.ms
+break
+
+LOAD_UBOOT:
+print "loading uboot..."
+d.load.elf ./../u-boot /gnu
+;D.LOAD.BINARY   Z:\Perforce\ws_iverson.hsieh_wcn_se2_buider_main_7623_20150126\WIFI_SOC\TRUNK\RT288x_SDK\source\images\iverson_uImage 0x84000000
+;data.load.binary \\172.23.110.103\tftpboot\ryder_vmlinux.bin &KernelStart
+
+Y.SPATH.RESET ; reset all source path
+Y.SPATH.SRD ./../
+
+;Break.Delete 
+B.set board_init_f
+
+;LOAD_BOOTLOADER:
+;&BOOTLOADER_DONE=1
+;print "loading bootloader..."
+;data.load.elf mt7623_fpga_bl.axf /gnu 
+
+;winclear
+winpos 0% 0% 50% 100%
+d.l
+go
+
+wait !run()
+
+B.delete board_init_f
+
+; U-boot RAM relocation address
+&NR_RELOCS=VARVALUE(gd->reloc_off)
+print "NR_RELOCS=%x" &NR_RELOCS
+;wait 20000.ms
+SYMbol.reloc &NR_RELOCS
+
+; break in board_init_r for debug
+;B.set board_init_r
+
+go
+
+enddo

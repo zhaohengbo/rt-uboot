@@ -1,0 +1,223 @@
+;*****************************************************************************
+;  Copyright Statement:
+;  --------------------
+;  This software is protected by Copyright and the information contained
+;  herein is confidential. The software may not be copied and the information
+;  contained herein may not be used or disclosed except with the written
+;  permission of MediaTek Inc. (C) 2011
+;
+;*****************************************************************************
+;;================================================
+;; PURPOSE:     FPGA Bring Up
+;; CREATE_DATE: 2014/09/09
+;; NOTE:
+;;================================================
+; Specify Core Number
+;=================================================
+
+&NR_CPUS=1
+; cluster 0 corebase: 0x8007000, 0x8007200, 0x8007400, 0x8007600
+; cluster 1 corebase: 0x8009000, 0x8009200, 0x8009400, 0x8009600
+
+;=================================================
+; Initialize CPU
+;=================================================
+&WDT_TEST=0
+if &WDT_TEST==0
+(
+	RESET
+	SYSTEM.OPTION ENRESET ON
+)
+
+SYSTEM.RESET
+SYSTEM.OPTION ENRESET ON
+SYSTEM.OPTION RESBREAK OFF
+SYSTEM.OPTION WAITRESET OFF
+
+SYSTEM.JTAGCLOCK 10.MHz;
+
+;SYSTEM.CPU CortexA7MPCore
+SYStem.CPU CORTEXA53;
+
+;R-T Memory Access
+SYSTEM.MULTICORE MEMORYACCESSPORT 0
+SYSTEM.MULTICORE DEBUGACCESSPORT 1
+
+;SYSTEM.MULTICORE COREBASE APB:0x80070000
+;Setting Core debug register access
+if &NR_CPUS==1
+(
+    SYStem.CONFIG CORENUMBER 1;
+    SYStem.CONFIG COREBASE 0x80810000;
+    SYStem.CONFIG CTIBASE 0x80820000;
+)
+else
+(
+    SYSTEM.CONFIG CORENUMBER 2;
+    SYSTEM.CONFIG COREBASE 0x80810000 0x80910000;
+    SYStem.CONFIG CTIBASE 0x80820000 0x80920000;
+)
+
+;=================================================
+; Attach and Stop CPU
+;=================================================
+SYStem.Up
+wait 200.us
+
+SETUP.IMASKHLL ON
+SETUP.IMASKASM ON
+
+;Disable acinactm
+;d.s c:0x1020002c  %le %long 0x8
+;d.s c:0x1020022c  %le %long 0x8
+
+
+;=================================================
+; Initialize EMI
+;=================================================
+&init_emi=1 ; 0: not init
+            ; 1: init
+IF &init_emi==1
+(
+; Init DDR
+;do MTxxxx_FPGA_DDR.cmm
+  ;do MT6735_FPGA_DDR.cmm
+  do MT7622_FPGA_DDR.cmm
+  wait 3000.ms
+)
+
+
+;D.S SD:0x00000000 %LE %LONG 0xEAFFFFFE
+;D.S SD:0x10006000 %LE %LONG 0x0b160001
+;D.S SD:0x100062A0 %LE %LONG 0x7C
+;D.S SD:0x100062B0 %LE %LONG 0x7C
+
+;
+;	Iverson 20150506 - Original cmm script is 256KB, but it doesn't work.
+;					I refer to mt6735m-evb.cmm of preloader to change to 128KB
+;
+
+;enable L2C 128KB
+D.S SD:0x10200000 %LE %LONG 0x00000000 ;Set L2C size to 128 KB
+D.S SD:0x10200000 %LE %LONG 0x00001000 ;Enable L2C share SRAM
+
+; set_hw_breakpoint_by_def
+; setting attribute of breakpoints
+Break.Select Program OnChip
+Break.Select Hll OnChip
+Break.Select Spot OnChip
+Break.Select Read OnChip
+Break.Select Write OnChip
+
+D.S C15:0x1 0				; Turn off MMU
+
+; disable wdt (debug purpose)
+D.S SD:0x10212000 %LE %LONG 0x22000000
+
+;
+;	Iverson 20150526 - Load special version preloader
+;			The preloader is turned off load uboot image (CFG_LOAD_UBOOT :=0) and load ATF image (in bldr_load_images()).
+;
+PRINT "Load TINY preloader and GO."
+;d.load.elf V:\Perforce\ws_iverson.hsieh_ALPS_L1_MT7622_M6735_20140310\ALPS_SW\TRUNK\L1\alps\out\target\product\evb6735m_64\obj\PRELOADER_OBJ\bin\preloader_evb6735m_64.elf
+;d.load.elf V:\Perforce\ws_iverson.hsieh_ALPS_L1_MT7622_M6735_20150430\ALPS_SW\TRUNK\L1\alps\out\target\product\fpga6735m_64\obj\PRELOADER_OBJ\bin\preloader_fpga6735m_64.elf
+d.load.elf preloader_fpga7622_64.elf
+
+
+Register.Set T 0 ; must
+
+;
+; Iverson 20150506 - We need to initial DRAM first before downloading image to DRAM.
+;			Initial DRAM function is in platform_init()->mt_mem_init() so we need set breakpoint in ram_console_init() that is after mt_mem_init()
+;			
+;
+
+;set break point for tiny bootloader deadloop position
+;b.s ram_console_init
+
+;
+; Iverson 20150506 - Open code window.
+;
+;d.l
+
+;
+; Iverson 20150506 - Start run.
+;			Cmm file and preloader file are running simultaneously.
+;			So, cmm file wait 3 sec for preloader to reach breakpoint (ram_console_init()).
+;
+;GO
+;wait !run()
+;wait 3000.ms
+
+;
+;	Iverson 20150506 - delete preloader breakpoint (ram_console_init())
+;
+Break.Delete /ALL
+
+;
+; Iverson 20150506 - Disable watchdog to avoid system reset
+;
+; disable WDT
+D.S SD:0x10212000 %LE %LONG 0x22000000
+
+;
+;	Iverson 20150506 - /noreg means don't update register.
+;			All registers in ARM should be kept becasue we need run from preloader breakpoint (bldr_load_images()).
+;
+PRINT "Load ATF ELF..."
+;d.load.elf ../../../out/build/debug/bl31/bl31.elf
+;d.load.elf ../../../../../out/target/product/evb6753_64/trustzone/ATF_OBJ/debug/bl31/bl31.elf /nocode
+;d.load.elf ../../../../../out/target/product/evb6735m_64/trustzone/ATF_OBJ/debug/bl31/bl31.elf /noclear /noreg
+;d.load.binary V:\Perforce\ws_iverson.hsieh_ALPS_L1_MT7622_M6735_20140310\ALPS_SW\TRUNK\L1\alps\out\target\product\evb6735m_64\trustzone\ATF_OBJ\debug\bl31.bin 0x48001000 /noclear
+;d.load.elf V:\Perforce\ws_iverson.hsieh_ALPS_L1_MT7622_M6735_20140310\ALPS_SW\TRUNK\L1\alps\out\target\product\evb6735m_64\trustzone\ATF_OBJ\debug\bl31\bl31.elf /noclear /noreg
+d.load.elf atf_fpga7622_64.elf /noclear /noreg
+
+; normal version uboot
+;D.LOAD.BINARY ../../../../../out/target/product/mtxxxx_fpga/obj/BOOTLOADER_OBJ/build-mtxxxx_fpga/lk-no-mtk-header.bin 0x41E00000 /noclear
+;D.LOAD.BINARY ../../../../../out/target/product/evb6735_64_atf1/obj/BOOTLOADER_OBJ/build-evb6735_64_atf1/lk-no-mtk-header.bin 0x41E00000 /noclear
+;D.LOAD.BINARY ../../../../../out/target/product/evb6735m_64/obj/BOOTLOADER_OBJ/build-evb6735m_64/lk-no-mtk-header.bin 0x41E00000 /noclear
+;D.LOAD.BINARY Z:\Perforce\ws_iverson.hsieh_wcn_se2_uboot_2014_20150316\WIFI_SOC\DEV\Uboot-2014\u-boot.bin 0x41E00000 /noclear
+;D.LOAD.BINARY Z:\Perforce\ws_iverson.hsieh_wcn_se2_main_uboot_7622_20150506\WIFI_SOC\TRUNK\Uboot-arm\u-boot.bin 0x41E00000 /noclear
+D.LOAD.ELF ./../u-boot /noclear /noreg
+
+; Iverson 20150510 - Load uboot FIT uImage (kernel + FDT)
+D.LOAD.BINARY Z:\Perforce\ws_iverson.hsieh_wcn_se2_builder_MT7622_20150508\WIFI_SOC\TRUNK\RT288x_SDK\source\images\iverson_uImage 0x4007FF18 /noclear
+D.LOAD.BINARY mt7622_rootfs.gz 0x44000000 /noclear
+
+
+;Y.SPATH.RESET ; reset all source path
+;Y.SPATH.SRD ./../
+
+;Break.Delete 
+;b.s el3_exit
+;B.set 0x41E00000
+B.set board_init_f
+;B.set board_init_r
+;B.set uart_setbrg
+
+;
+;	Iverson 20150506 - continue run from preloader.
+;
+
+winpos 0% 0% 50% 100%
+GO
+d.l
+
+wait !run()
+Break.Delete /ALL
+
+; U-boot RAM relocation address
+&NR_RELOCS=VARVALUE(gd->reloc_off)
+print "NR_RELOCS=%x" &NR_RELOCS
+;wait 20000.ms
+SYMbol.reloc &NR_RELOCS
+
+;Register set for NAND/SPI_NAND
+d.s c:0x1000205C %le %long 0x1
+
+; break in board_init_r for debug
+; B.set board_init_r
+;B.set jumparch64_smc
+Go
+
+enddo

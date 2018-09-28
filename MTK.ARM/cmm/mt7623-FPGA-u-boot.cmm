@@ -1,0 +1,84 @@
+SYSTEM.Reset
+SYSTEM.CPU CortexA7MPCore
+System.Option Cflush ON    	;flush the cache to avoid data consistency
+SYSTEM.OPTION ENRESET ON
+SYSTEM.OPTION TRST ON
+SYStem.Option ResBreak OFF
+SYStem.Option WaitReset OFF
+SYStem.JtagClock 10.MHz
+
+;Setting Core debug register access
+SYStem.CONFIG CORENUMBER 1;
+SYSTEM.MULTICORE COREBASE 0x80070000
+
+
+
+SYStem.Up
+wait 200.us
+
+Break.Select Program OnChip
+Break.Select Hll OnChip
+;Break.Select Spot OnChip
+Break.Select Read OnChip
+Break.Select Write OnChip
+
+; disable WDT
+d.s asd:0x10007000 %le %long 0x22000000
+
+; disable DABORT and PABORT breakpoint
+tronchip.set dabort off
+tronchip.set pabort off
+tronchip.set undef off
+tronchip.set irq off
+;
+
+; board init
+
+; Init DDR
+do MT7623_FPGA_DDR.cmm
+
+print "loading bootloader..."
+data.load.elf mt7623_fpga_bl.axf /gnu 
+
+SET_PRELOADER_PC:
+r.s pc 0x201000
+
+RUN_PRELOADER:
+go
+wait 2000.ms
+break
+
+; disable WDT
+; d.s asd:0x10007000 %le %long 0x22000000
+
+LOAD_UBOOT:
+print "loading uboot..."
+d.load.elf ./../u-boot /gnu
+
+Y.SPATH.RESET ; reset all source path
+Y.SPATH.SRD ./../
+
+;Break.Delete 
+B.set board_init_f
+
+;winclear
+winpos 0% 0% 50% 100%
+d.l
+go
+
+wait !run()
+
+B.delete board_init_f
+
+; U-boot RAM relocation address
+&NR_RELOCS=VARVALUE(gd->reloc_off)
+print "NR_RELOCS=%x" &NR_RELOCS
+;wait 20000.ms
+SYMbol.reloc &NR_RELOCS
+
+; break in board_init_r for debug
+;B.set board_init_r
+;
+go
+
+enddo
