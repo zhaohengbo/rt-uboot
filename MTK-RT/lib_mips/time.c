@@ -66,6 +66,14 @@ ulong get_timer(ulong base)
 	return mips_count_get() - base;
 }
 
+void early_udelay (unsigned long usec)
+{
+	ulong tmo;
+	ulong start = get_timer(0);
+	tmo = usec * ((mips_cpu_feq/2) / 1000000);
+	while ((ulong)((mips_count_get() - start)) < tmo)
+		/*NOP*/;
+}
 
 void udelay (unsigned long usec)
 {

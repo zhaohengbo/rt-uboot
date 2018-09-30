@@ -64,6 +64,7 @@ static int watchdog_reset();
 #endif
 
 extern int timer_init(void);
+extern void early_udelay (unsigned long usec);
 
 extern void  rt2880_eth_halt(struct eth_device* dev);
 
@@ -649,7 +650,7 @@ void board_init_f(ulong bootflag)
 		value &= ~(0x1F);
 		value |= (step&0x1F);
 		RALINK_REG(RT2880_SYSCLKCFG_REG) = value;
-		udelay(10);
+		early_udelay(10);
 	};	
 #elif defined(MT7628_ASIC_BOARD)
 	value = RALINK_REG(RALINK_DYN_CFG0_REG);
@@ -667,7 +668,7 @@ void board_init_f(ulong bootflag)
 		value &= ~(0x0F<<8);
 		value |= (fdiv<<8);
 		RALINK_REG(RALINK_DYN_CFG0_REG) = value;
-		udelay(500);
+		early_udelay(500);
 		i++;
 		value = RALINK_REG(RALINK_DYN_CFG0_REG);
 		fdiv = ((value>>8)&0x0F);
@@ -688,7 +689,7 @@ void board_init_f(ulong bootflag)
 		value &= ~(0x0F<<8);
 		value |= (fdiv<<8);
 		RALINK_REG(RALINK_DYN_CFG0_REG) = value;
-		udelay(500);
+		early_udelay(500);
 		i++;
 		value = RALINK_REG(RALINK_CUR_CLK_STS_REG);
 		fdiv = ((value>>8)&0x1F);
