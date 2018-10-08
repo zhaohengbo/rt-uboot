@@ -24,7 +24,7 @@
 MIPSFLAGS := -fno-schedule-insns -fno-schedule-insns2
 MIPSFLAGS += -mips32r2 -march=mips32r2 -mtune=34kc
 
-PLATFORM_CPPFLAGS += -G 0 -mabicalls -fpic -msoft-float
+PLATFORM_CPPFLAGS += -G 0 -mabicalls -fpic -msoft-float -ffixed-s7
 PLATFORM_CPPFLAGS += $(MIPSFLAGS)
 
 PLATFORM_LDFLAGS += -G 0 -static -n -nostdlib

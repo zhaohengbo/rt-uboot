@@ -33,7 +33,6 @@
 #include <rtos/rtos_data.h>
 
 DECLARE_GLOBAL_DATA_PTR;
-volatile gd_t *gd;
 
 /*#define BOARD_DEBUG*/
 
@@ -335,7 +334,7 @@ void board_init_r(gd_t *id, ulong dest_addr)
 	char *s;
 	int i;
 	rd_t rd;
-
+	
 	gd = id;
 
 	/* Tell others: relocation done */

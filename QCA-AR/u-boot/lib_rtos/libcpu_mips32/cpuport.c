@@ -12,12 +12,15 @@
  * 20011-05-23    aozima       the first version for PIC32.
  * 20011-09-05    aozima       merge all of C source code into cpuport.c.
  */
+#include <common.h>
 #include <rtthread.h>
 #include "mipsregs.h"
 /**
  * @addtogroup PIC32
  */
 /*@{*/
+
+DECLARE_GLOBAL_DATA_PTR;
 
 /* exception and interrupt handler table */
 rt_uint32_t rt_interrupt_from_thread, rt_interrupt_to_thread;
@@ -67,7 +70,7 @@ rt_uint8_t *rt_hw_stack_init(void *tentry, void *parameter, rt_uint8_t *stack_ad
 	*(--stk) = (rt_uint32_t) 0x0000001a;	/* k0 */
 	*(--stk) = (rt_uint32_t) tentry;	    /* t9 */
 	*(--stk) = (rt_uint32_t) 0x00000018;	/* t8 */
-	*(--stk) = (rt_uint32_t) 0x00000017;	/* s7 */
+	*(--stk) = (rt_uint32_t) gd;			/* s7 */
 	*(--stk) = (rt_uint32_t) 0x00000016;	/* s6 */
 	*(--stk) = (rt_uint32_t) 0x00000015;	/* s5 */
 	*(--stk) = (rt_uint32_t) 0x00000014;	/* s4 */

@@ -33,7 +33,6 @@
 /*#define DEBUG_ENABLE_BOOTSTRAP_PRINTF*/
 
 DECLARE_GLOBAL_DATA_PTR;
-volatile gd_t *gd;
 
 #if (((CFG_ENV_ADDR+CFG_ENV_SIZE) < BOOTSTRAP_CFG_MONITOR_BASE) || \
 	 (CFG_ENV_ADDR >= (BOOTSTRAP_CFG_MONITOR_BASE + CFG_MONITOR_LEN))) \
@@ -87,9 +86,9 @@ void free(void *src)
 	return;
 }
 
-static int init_func_ram(gd_t *id)
+static int init_func_ram(void)
 {
-	if ((id->ram_size = dram_init()) > 0)
+	if ((gd->ram_size = dram_init()) > 0)
 		return 0;
 
 	return 1;
@@ -115,7 +114,7 @@ static int init_func_ram(gd_t *id)
  * argument, and returns an integer return code, where 0 means
  * "continue" and != 0 means "fatal error, hang the system".
  */
-typedef int(init_fnc_t)(gd_t *id);
+typedef int(init_fnc_t)(void);
 
 init_fnc_t *init_sequence[] = { init_func_ram,
 								NULL, };
@@ -128,21 +127,18 @@ void bootstrap_board_init_f(ulong bootflag)
 	ulong addr, addr_sp, len = (ulong)&uboot_end_bootstrap - BOOTSTRAP_CFG_MONITOR_BASE;
 	ulong *s;
 
-	all_led_on();
-	
 	/* Pointer is writable since we allocated a register for it */
-	id = &gd_data;
+	gd = &gd_data;
 
 	/* Compiler optimization barrier needed for GCC >= 3.4 */
 	__asm__ __volatile__("": : :"memory");
 
-	memset((void *)id, 0, sizeof(gd_t));
+	memset((void *)gd, 0, sizeof(gd_t));
 
 	for (init_fnc_ptr = init_sequence; *init_fnc_ptr; ++init_fnc_ptr) {
-		if ((*init_fnc_ptr)(id) != 0)
+		if ((*init_fnc_ptr)() != 0)
 			hang();
 	}
-	gd = id;
 
 	/*
 	 * Now that we have DRAM mapped and working, we can
@@ -227,7 +223,7 @@ void bootstrap_board_init_r(gd_t *id, ulong dest_addr)
 	unsigned int destLen;
 	int (*fn)(int);
 	
-	all_led_off();
+	gd = id;
 
 	/* Initialize malloc() area */
 	mem_malloc_init(dest_addr);
@@ -257,7 +253,7 @@ void bootstrap_board_init_r(gd_t *id, ulong dest_addr)
 
 	fn = (void *)ntohl(hdr->ih_load);
 
-	(*fn)(id->ram_size);
+	(*fn)(gd->ram_size);
 
 	hang();
 }
