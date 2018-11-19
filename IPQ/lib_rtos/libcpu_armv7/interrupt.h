@@ -20,6 +20,8 @@
 
 void rt_hw_interrupt_control(int vector, int priority, int route);
 
+void rt_hw_interrupt_config(int vector,int config);
+
 void rt_hw_interrupt_init(void);
 
 #endif

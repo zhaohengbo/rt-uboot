@@ -72,7 +72,7 @@
 #define S_IXOTH              00001
 
 /* stat structure */
-#include <stdint.h>
+//#include <stdint.h>
 #include <linux/types.h>
 //typedef unsigned long time_t;
 

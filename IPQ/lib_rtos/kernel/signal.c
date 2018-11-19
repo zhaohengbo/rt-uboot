@@ -22,7 +22,7 @@
  * 2017/10/5      Bernard      the first version
  */
 
-#include <stdint.h>
+#include <linux/types.h>
 //#include <string.h>
 
 #include <rthw.h>

@@ -26,6 +26,7 @@ void arm_gic_umask(rt_uint32_t index, int irq);
 void arm_gic_set_cpu(rt_uint32_t index, int irq, unsigned int cpumask);
 void arm_gic_set_group(rt_uint32_t index, int vector, int group);
 
+void arm_gic_config(rt_uint32_t index, int irq, int config);
 int arm_gic_get_active_irq(rt_uint32_t index);
 void arm_gic_ack(rt_uint32_t index, int irq);
 

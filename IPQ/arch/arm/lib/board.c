@@ -56,8 +56,6 @@
 #include <hush.h>
 #endif
 
-#include <rtos/rtos_data.h>
-
 #if defined(ASUS_PRODUCT)
 #include <gpio.h>
 #include <replace.h>
@@ -473,21 +471,17 @@ void board_init_f(ulong bootflag)
 
 #ifndef CONFIG_SPL_BUILD
 	
-	rd.ram_size = gd->ram_size;
-	
-	rd.rtos_mem_start = addr;
-	
 #define TOTAL_RTOS_LENGTH 0x4000
+	
+	gd->rtos_mem_end = addr - 4;
 	
 	addr -= TOTAL_RTOS_LENGTH;
 	addr &= ~(4096 - 1);
 	
-	rd.rtos_mem_end = addr - 4;
-
-#if defined(BOARD_DEBUG)
-	printf("Reserving %dk for RTOS at: %08lX\n",
-		TOTAL_RTOS_LENGTH >> 10, addr);
-#endif
+	gd->rtos_mem_start = addr;
+	
+	debug("Reserving %dk for rtos at: %08lx\n",
+	      TOTAL_RTOS_LENGTH >> 10, addr);
 	
 	/*
 	 * reserve memory for malloc() arena

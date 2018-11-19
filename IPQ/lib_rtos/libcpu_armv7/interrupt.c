@@ -11,16 +11,17 @@
  * Date           Author       Notes
  * 2013-07-06     Bernard      first version
  */
+#include <common.h>
 
 #include <rthw.h>
 #include <rtthread.h>
-
-#include <rtos/rtos_data.h>
 
 #include "gic.h"
 #include "soc_config.h"
 
 #define MAX_HANDLERS                SOC_HANDLERS
+
+DECLARE_GLOBAL_DATA_PTR;
 
 extern volatile rt_uint8_t rt_interrupt_nest;
 
@@ -39,9 +40,9 @@ extern int system_vectors_end;
 static void rt_hw_vector_init(void)
 {
 	rt_uint32_t int_vector;
-	int_vector = rd.ram_buttom;
+	int_vector = gd->start_addr_sp;
 	
-	RT_ASSERT(rd.ram_size > 0x800000);
+	RT_ASSERT(gd->ram_size > 0x800000);
 	
 	if((int_vector & 0xFFFFF) < 0x40000)
 	{
@@ -49,7 +50,7 @@ static void rt_hw_vector_init(void)
 	}
 	int_vector &= ~(0xFFFFF);
 	
-	rt_memcpy((void *)int_vector, (void *)&system_vectors , (system_vectors_end - system_vectors));
+	rt_memcpy((void *)int_vector, (void *)&system_vectors , ((rt_uint32_t)&system_vectors_end - (rt_uint32_t)&system_vectors));
 	
     rt_cpu_vector_set_base(int_vector);
 }

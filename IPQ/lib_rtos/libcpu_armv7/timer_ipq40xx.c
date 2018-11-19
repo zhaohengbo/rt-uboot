@@ -43,44 +43,9 @@
 #define SOC_IRQ_TIMER4 (16 + 1) //HYP
 #define SOC_IRQ_TIMER_LEVEL IRQ_TYPE_LEVEL
 
-static rt_uint32_t soc_read_timer_count(void)
-{
-	rt_uint32_t vect_hi1, vect_hi2;
-	rt_uint32_t vect_low;
-
-repeat:
-	vect_hi1 = readl(GCNT_CNTCV_HI);
-	vect_low = readl(GCNT_CNTCV_LO);
-	vect_hi2 = readl(GCNT_CNTCV_HI);
-
-	if (vect_hi1 != vect_hi2)
-		goto repeat;
-
-	return vect_low;
-}
-
-static void soc_timer_set_value(rt_uint32_t value)
-{
-	unsigned long ctrl;
-	ctrl = readl(GCNT_BASE + QTMR_CNTP_CTL);
-	ctrl |= ARCH_TIMER_CTRL_ENABLE;
-	ctrl &= ~ARCH_TIMER_CTRL_IT_MASK;
-	
-	value += soc_read_timer_count();
-	
-	writel(value, GCNT_BASE + QTMR_CNTP_TVAL);
-	writel(ctrl, GCNT_BASE + QTMR_CNTP_CTL);
-}
-
 void soc_timer_isr_handler(void)
 {
-	unsigned long ctrl;
-	ctrl = readl(GCNT_BASE + QTMR_CNTP_CTL);
-	if (ctrl & ARCH_TIMER_CTRL_IT_STAT) {
-		ctrl |= ARCH_TIMER_CTRL_IT_MASK;
-		writel(ctrl, GCNT_BASE + QTMR_CNTP_CTL);
-	}
-	soc_timer_set_value(TIMER_CLK_FREQ/RT_TICK_PER_SECOND);
+	writel(TIMER_CLK_FREQ/RT_TICK_PER_SECOND, GCNT_BASE + QTMR_CNTP_TVAL);
 }
 
 void soc_timer_init(void)
@@ -89,19 +54,19 @@ void soc_timer_init(void)
 	
 	ctrl = readl(GCNT_BASE + QTMR_CNTP_CTL);
 	
-	ctrl &= ~ARCH_TIMER_CTRL_ENABLE;
+	ctrl |= ARCH_TIMER_CTRL_ENABLE;
 	
 	writel(ctrl, GCNT_BASE + QTMR_CNTP_CTL);
 	
-	soc_timer_set_value(TIMER_CLK_FREQ/RT_TICK_PER_SECOND);
+	writel(TIMER_CLK_FREQ/RT_TICK_PER_SECOND, GCNT_BASE + QTMR_CNTP_TVAL);
 }
 
 extern void rt_hw_timer_isr(int vector, void *param);
 
 void soc_timer_isr_install(void)
 {
-	rt_hw_interrupt_install(SOC_IRQ_TIMER1, rt_hw_timer_isr, RT_NULL, "secure-tick");
-	rt_hw_interrupt_mask(SOC_IRQ_TIMER1);
-	rt_hw_interrupt_config(SOC_IRQ_TIMER1,SOC_IRQ_TIMER_LEVEL);
-    rt_hw_interrupt_umask(SOC_IRQ_TIMER1);
+	rt_hw_interrupt_install(SOC_IRQ_TIMER2, rt_hw_timer_isr, RT_NULL, "secure-tick");
+	rt_hw_interrupt_mask(SOC_IRQ_TIMER2);
+	rt_hw_interrupt_config(SOC_IRQ_TIMER2,SOC_IRQ_TIMER_LEVEL);
+    rt_hw_interrupt_umask(SOC_IRQ_TIMER2);
 }

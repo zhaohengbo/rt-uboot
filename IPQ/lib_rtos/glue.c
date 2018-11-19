@@ -12,14 +12,11 @@
  * 2012-11-20     Bernard    the first version
  */
 
+#include <common.h>
 #include <rthw.h>
 #include <rtthread.h>
 
-#include <rtos/rtos_data.h>
-
 #include "glue.h"
-
-rd_t rd;
 
 ALIGN(RT_ALIGN_SIZE)
 static char thread_main_stack[0x20000];
@@ -83,7 +80,7 @@ static void idle_wfi(void)
 /**
  * This function will initialize beaglebone board
  */
-void rt_hw_board_init()
+void rt_hw_board_init(void)
 {
 	extern void rt_relocation_patch(void);
 	extern void stack_setup(void);
@@ -94,7 +91,7 @@ void rt_hw_board_init()
     rt_hw_interrupt_init();
 	
 #ifdef RT_USING_HEAP
-	rt_system_heap_init((void*)rd.rtos_mem_start, (void*)rd.rtos_mem_end);
+	rt_system_heap_init((void*)gd->rtos_mem_start, (void*)gd->rtos_mem_end);
 #endif
 
 #ifdef RT_USING_COMPONENTS_INIT
@@ -114,13 +111,13 @@ void rt_hw_board_init()
 #endif
 }
 
-void rtthread_startup()
+void rtthread_startup(void)
 {
 	//return;
 	rt_hw_interrupt_disable();
 	
     /* init board */
-    rt_hw_board_init(rd);
+    rt_hw_board_init();
 
     /* show version */
     rt_show_version();

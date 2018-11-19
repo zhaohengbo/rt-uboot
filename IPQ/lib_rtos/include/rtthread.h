@@ -477,8 +477,10 @@ void rt_components_board_init(void);
  * general kernel service
  */
 #ifndef RT_USING_CONSOLE
-#define rt_kprintf(...)
-#define rt_kputs(str)
+extern int	printf(const char *fmt, ...);
+extern void	puts(const char *s);
+#define rt_kprintf(fmt, args...)	printf(fmt, ##args)
+#define rt_kputs(str)	puts(str)
 #else
 void rt_kprintf(const char *fmt, ...);
 void rt_kputs(const char *str);

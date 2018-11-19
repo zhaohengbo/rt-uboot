@@ -12,10 +12,11 @@
  * 2011-09-23     Bernard      the first version
  * 2011-10-05     Bernard      add thumb mode
  */
+#include <common.h>
 #include <rtthread.h>
 #include "armv7.h"
 
-register volatile rt_uint32_t gd asm ("r8");
+DECLARE_GLOBAL_DATA_PTR;
 
 /**
  * @addtogroup AM33xx
@@ -40,18 +41,18 @@ rt_uint8_t *rt_hw_stack_init(void *tentry, void *parameter,
 	stk 	 = (rt_uint32_t*)stack_addr;
 	*(stk) 	 = (rt_uint32_t)tentry;			/* entry point */
 	*(--stk) = (rt_uint32_t)texit;			/* lr */
-	*(--stk) = 0;							/* r12 */
-	*(--stk) = 0;							/* r11 */
-	*(--stk) = 0;							/* r10 */
-	*(--stk) = 0;							/* r9 */
-	*(--stk) = gd;							/* r8 */
-	*(--stk) = 0;							/* r7 */
-	*(--stk) = 0;							/* r6 */
-	*(--stk) = 0;							/* r5 */
-	*(--stk) = 0;							/* r4 */
-	*(--stk) = 0;							/* r3 */
-	*(--stk) = 0;							/* r2 */
-	*(--stk) = 0;							/* r1 */
+	*(--stk) = (rt_uint32_t)gd;				/* r12 */
+	*(--stk) = (rt_uint32_t)gd;				/* r11 */
+	*(--stk) = (rt_uint32_t)gd;				/* r10 */
+	*(--stk) = (rt_uint32_t)gd;				/* r9 */
+	*(--stk) = (rt_uint32_t)gd;				/* r8 */
+	*(--stk) = (rt_uint32_t)gd;				/* r7 */
+	*(--stk) = (rt_uint32_t)gd;				/* r6 */
+	*(--stk) = (rt_uint32_t)gd;				/* r5 */
+	*(--stk) = (rt_uint32_t)gd;				/* r4 */
+	*(--stk) = (rt_uint32_t)gd;				/* r3 */
+	*(--stk) = (rt_uint32_t)gd;				/* r2 */
+	*(--stk) = (rt_uint32_t)gd;				/* r1 */
 	*(--stk) = (rt_uint32_t)parameter;		/* r0 : argument */
 
 	/* cpsr */
